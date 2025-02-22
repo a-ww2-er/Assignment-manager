@@ -4,13 +4,9 @@ import { UnauthorizedException } from "../exceptions/unauthorized";
 import { JWT_SECRET } from "../variables";
 import * as jwt from "jsonwebtoken";
 import { prismaClient } from "..";
-import { IUserRequest } from "../types/express";
+// import { IUserRequest } from "../types/express";
 
-const authMiddleware = async (
-  req: IUserRequest,
-  res: Response,
-  next: NextFunction
-) => {
+const authMiddleware = async (req: any, res: Response, next: NextFunction) => {
   //EXTRACT THE TOKEN FROM HEADER
   let token = req.headers.authorization || req?.cookies?.access_token;
   if (token && token.startsWith("Bearer ")) {
