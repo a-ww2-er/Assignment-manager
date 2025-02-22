@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL") 
+}
+
+model User {
+  id          String    @id @default(uuid())
+  matricNo    String    @unique
+  password    String
+  email       String    @unique
+  department  String
+  faculty     String
+  level       String?
+  firstName   String
+  lastName    String
+  otherNames  String
+  profileImage String
+  role        Role      @default(STUDENT)
+  createdAt   DateTime  @default(now())
+  submissions Submission[]
+  course     Course[]  @relation("CourseLecturer")
+
+  Assignment Assignment[]
+
+  Courses Course[]
+}
+
+model Course { 
+  id  String   @id @default(uuid())
+  title String  @unique
+ lecturer    User      @relation(fields: [lecturerId], references: [id])
+  lecturerId  String
+
+  User User[] @relation("CourseLecturer")
+}
+
+
+model Assignment {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  dueDate     DateTime
+  category    String
+  type        AssignmentType @default(DOCUMENT_UPLOAD)
+  files       File[] // For lecturer-uploaded reference files
+  createdAt   DateTime  @default(now())
+  lecturer    User      @relation(fields: [lecturerId], references: [id])
+  lecturerId  String
+  submissions Submission[]
+  questions   Question[] // One-to-Many: One Assignment can have many Questions
+}
+
+model Question {
+  id          String @id @default(uuid())
+  question    String
+  answer      String
+  assignment  Assignment @relation(fields: [assignmentId], references: [id]) // Many-to-One: Question belongs to one Assignment
+  assignmentId String
+}
+
+model File { 
+  id String @id @default(uuid())
+  fileUrl String
+  assignmentId String
+  Assignment Assignment[]
+}
+
+model Submission {
+  id           String   @id @default(uuid())
+  fileUrl      String?  // For document uploads
+  textResponse String?  // For text assignments
+  submittedAt  DateTime @default(now())
+  student      User     @relation(fields: [studentId], references: [id])
+  studentId    String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  assignmentId String
+}
+
+enum Role {
+  STUDENT
+  LECTURER
+}
+
+enum AssignmentType {
+  DOCUMENT_UPLOAD
+  TEXT_RESPONSE
+}
