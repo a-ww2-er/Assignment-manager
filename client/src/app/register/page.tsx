@@ -127,8 +127,8 @@ export default function RegisterPage() {
       console.log("Registration successful:", response.data);
       // Handle successful registration (e.g., redirect to login page)
     } catch (error) {
-      toast(`Error ${error?.response?.message || error?.message}`);
-
+      // toast(`Error ${error?.response?.message || error?.message}`);
+      toast(`Couldnt connect to server , try again`);
       console.error("Registration failed:", error);
       // Handle registration error (e.g., show error message to user)
     } finally {
