@@ -6,7 +6,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 
 import { usePathname } from "next/navigation";
-import { Sidebar, SidebarProvider } from "@/components/ui/sidebar";
+
 import { Sidenav } from "@/components/SideNav";
 import { Toaster } from "@/components/ui/sonner";
 

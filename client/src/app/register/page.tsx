@@ -117,7 +117,7 @@ export default function RegisterPage() {
 
       // Send the data to the backend as JSON
       const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        "https://assignment-manager-gefc.onrender.com/api/auth/register",
         dataToSend,
         {
           headers: { "Content-Type": "application/json" },
@@ -126,8 +126,9 @@ export default function RegisterPage() {
       toast(response?.data?.message);
       console.log("Registration successful:", response.data);
       // Handle successful registration (e.g., redirect to login page)
-    } catch (error: any) {
-      toast(`Error ${error?.response?.message || error?.message}`);
+    } catch (error) {
+      const errorData: any = error;
+      toast(`Error ${errorData?.response?.message || errorData?.message}`);
 
       console.error("Registration failed:", error);
       // Handle registration error (e.g., show error message to user)
