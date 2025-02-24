@@ -242,14 +242,14 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {user.Courses.map((course) => (
+            {user && user?.Courses.map((course) => (
               <Card key={course.id}>
                 <CardHeader>
-                  <CardTitle className="text-lg">{course.code}</CardTitle>
+                  <CardTitle className="text-lg">{course?.courseCode}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    {course.title}
+                    {course?.title}
                   </p>
                   <Button asChild className="w-full mt-4">
                     <Link href={`/courses/${course.id}`}>View Course</Link>
