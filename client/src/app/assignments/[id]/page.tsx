@@ -1,83 +1,63 @@
 "use client";
-/* eslint-disable */
-
-import type React from "react";
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CalendarDays, Clock, Upload } from "lucide-react";
-import { Assignment, AssignmentType } from "@/types";
-
-// Mock data (replace with actual API calls)
-const localAssignments: Assignment[] = [
-  {
-    id: "1",
-    title: "Data Structures Quiz",
-    courseCode: "CMP401",
-    description: "This quiz will test your knowledge of basic data structures.",
-    dueDate: new Date("2023-06-15T14:00:00Z"),
-    type: AssignmentType.QUIZ,
-    questions: [
-      {
-        id: "q1",
-        question: "What is a stack?",
-        options: "LIFO, FIFO, Random Access, Sequential Access",
-      },
-      {
-        id: "q2",
-        question: "What is the time complexity of binary search?",
-        options: "O(1), O(n), O(log n), O(n log n)",
-      },
-    ],
-    category: "",
-    createdAt: new Date(),
-  },
-  {
-    id: "2",
-    title: "Software Engineering Project",
-    courseCode: "CMP402",
-    description: "Submit your final project report and source code.",
-    dueDate: new Date("2023-06-20T23:59:59Z"),
-    type: AssignmentType.DOCUMENT_UPLOAD,
-    category: "",
-    createdAt: new Date(),
-  },
-  {
-    id: "3",
-    title: "Database Design Essay",
-    courseCode: "CMP403",
-    description:
-      "Write an essay on the importance of normalization in database design.",
-    dueDate: new Date("2023-06-18T17:00:00Z"),
-    type: AssignmentType.DOCUMENT_UPLOAD,
-    category: "",
-    createdAt: new Date(),
-  },
-];
+import { CalendarDays, Clock, Upload, Loader2 } from "lucide-react";
+import type { Assignment } from "@/types";
+import api from "@/services/api/apiInterceptors";
 
 export default function AssignmentPage() {
   const params = useParams();
   const assignmentId = params.id as string;
-  const assignment = localAssignments.find((ass) => ass.id === assignmentId);
-  // const [assignments,setAssignments] = useState<Assignment[]>(localAssignments)
+  const [assignment, setAssignment] = useState<Assignment | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState("");
   const [quizAnswers, setQuizAnswers] = useState<{ [key: string]: string }>({});
-  const [textResponse, setTextResponse] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  if (!assignment) {
-    return null;
-  }
+
+  const fetchAssignment = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.get(`/api/assignments/${assignmentId}`);
+      setAssignment(response.data);
+      setError(null);
+
+      // Initialize form with existing submission if available
+      if (response.data.submissions?.[0]) {
+        const submission = response.data.submissions[0];
+        if (submission.quizAnswers) {
+          setQuizAnswers(submission.quizAnswers);
+        }
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to fetch assignment";
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const timer = setInterval(() => {
+    fetchAssignment();
+  }, [assignmentId]);
+
+  useEffect(() => {
+    if (!assignment) return;
+
+    const updateTimer = () => {
       const now = new Date();
       const dueDate = new Date(assignment.dueDate);
       const diff = dueDate.getTime() - now.getTime();
+
       if (diff > 0) {
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
@@ -87,32 +67,65 @@ export default function AssignmentPage() {
         setTimeRemaining(`${days}d ${hours}h ${minutes}m`);
       } else {
         setTimeRemaining("Due");
-        clearInterval(timer);
       }
-    }, 60000); // Update every minute
+    };
 
+    updateTimer();
+    const timer = setInterval(updateTimer, 60000);
     return () => clearInterval(timer);
-  }, [assignment.dueDate]);
+  }, [assignment?.dueDate]);
 
-  const handleQuizSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Quiz answers submitted:", quizAnswers);
-    // Here you would typically send the answers to your backend
-  };
+    try {
+      const formData = new FormData();
 
-  const handleTextSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Text response submitted:", textResponse);
-    // Here you would typically send the text response to your backend
-  };
+      if (assignment?.type === "DOCUMENT_UPLOAD" && file) {
+        formData.append("file", file);
+      } else if (assignment?.type === "QUIZ") {
+        formData.append("quizAnswers", JSON.stringify(quizAnswers));
+      }
 
-  const handleFileSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (file) {
-      console.log("File submitted:", file.name);
-      // Here you would typically upload the file to your backend
+      await api.post(`/api/assignments/${assignmentId}/submissions`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      fetchAssignment(); // Refresh assignment data
+    } catch (error) {
+      console.error("Submission error:", error);
+      setError("Failed to submit assignment");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-4">
+        <div className="text-destructive text-lg font-medium">{error}</div>
+        <Button onClick={fetchAssignment}>Retry</Button>
+      </div>
+    );
+  }
+
+  if (!assignment) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-muted-foreground">Assignment not found</div>
+      </div>
+    );
+  }
+
+  const hasSubmission =
+    assignment.submissions && assignment.submissions.length > 0;
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -120,11 +133,11 @@ export default function AssignmentPage() {
         <CardHeader>
           <CardTitle>{assignment.title}</CardTitle>
           <p className="text-sm text-muted-foreground">
-            {assignment.courseCode}
+            {assignment.course?.courseCode}
           </p>
         </CardHeader>
         <CardContent>
-          <p>{assignment.description}</p>
+          <p className="whitespace-pre-wrap">{assignment.description}</p>
           <div className="flex items-center mt-4 text-sm text-muted-foreground">
             <CalendarDays className="w-4 h-4 mr-2" />
             Due: {new Date(assignment.dueDate).toLocaleString()}
@@ -136,18 +149,46 @@ export default function AssignmentPage() {
         </CardContent>
       </Card>
 
-      {assignment.type === "QUIZ" && (
-        <Card>
+      {hasSubmission ? (
+        <Card className="bg-green-50">
           <CardHeader>
-            <CardTitle>Quiz Questions</CardTitle>
+            <CardTitle className="text-green-600">
+              Submission Received
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleQuizSubmit} className="space-y-4">
-              {assignment.questions &&
-                assignment.questions?.map((q) => (
+            {assignment.submissions?.[0]?.fileUrl && (
+              <a
+                href={assignment.submissions[0].fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                View Submitted File
+              </a>
+            )}
+            {assignment.submissions?.[0]?.grade !== undefined && (
+              <div className="mt-4">
+                <p className="font-medium">
+                  Grade: {assignment.submissions[0].grade}/15
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {assignment.type === "QUIZ" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Quiz Questions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {assignment.questions?.map((q) => (
                   <div key={q.id} className="space-y-2">
                     <Label>{q.question}</Label>
                     <RadioGroup
+                      value={quizAnswers[q.id]}
                       onValueChange={(value) =>
                         setQuizAnswers((prev) => ({ ...prev, [q.id]: value }))
                       }
@@ -158,62 +199,46 @@ export default function AssignmentPage() {
                           className="flex items-center space-x-2"
                         >
                           <RadioGroupItem
-                            value={option}
+                            value={option.trim()}
                             id={`${q.id}-${index}`}
                           />
-                          <Label htmlFor={`${q.id}-${index}`}>{option}</Label>
+                          <Label htmlFor={`${q.id}-${index}`}>
+                            {option.trim()}
+                          </Label>
                         </div>
                       ))}
                     </RadioGroup>
                   </div>
                 ))}
-              <Button type="submit">Submit Quiz</Button>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+              </CardContent>
+            </Card>
+          )}
 
-      {/* {assignment.type === "TEXT" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Your Response</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleTextSubmit} className="space-y-4">
-              <Textarea
-                placeholder="Type your response here..."
-                value={textResponse}
-                onChange={(e) => setTextResponse(e.target.value)}
-                rows={10}
-              />
-              <Button type="submit">Submit Response</Button>
-            </form>
-          </CardContent>
-        </Card>
-      )} */}
+          {assignment.type === "DOCUMENT_UPLOAD" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Upload Your Document</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid w-full max-w-sm items-center gap-1.5">
+                  <Label htmlFor="document">Document</Label>
+                  <Input
+                    id="document"
+                    type="file"
+                    accept=".pdf,.doc,.docx,image/*"
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    required
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-      {assignment.type === "DOCUMENT_UPLOAD" && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Upload Your Document</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleFileSubmit} className="space-y-4">
-              <div className="grid w-full max-w-sm items-center gap-1.5">
-                <Label htmlFor="document">Document</Label>
-                <Input
-                  id="document"
-                  type="file"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
-                />
-              </div>
-              <Button type="submit">
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Document
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+          <Button type="submit" className="w-full">
+            <Upload className="w-4 h-4 mr-2" />
+            Submit Assignment
+          </Button>
+        </form>
       )}
     </div>
   );

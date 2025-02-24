@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -16,9 +16,11 @@ import {
   GraduationCap,
   FileText,
   PlusCircle,
+  LogOutIcon,
 } from "lucide-react";
 import { useUserStore } from "@/services/store/userStore";
 import Image from "next/image";
+import { useAuthStore } from "@/services/store/authStore";
 // import { useUserStore } from "@/stores/userStore";
 
 const studentNavItems = [
@@ -44,11 +46,11 @@ export function Sidenav() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
-  const user = useUserStore((state) => state.user);
-
+  const { clearUser, user } = useUserStore();
+  const { clearTokens } = useAuthStore();
   const navItems =
     user?.role === "LECTURER" ? lecturerNavItems : studentNavItems;
-
+  const router = useRouter();
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
@@ -85,7 +87,7 @@ export function Sidenav() {
 
       <div
         className={cn(
-          "fixed top-0 left-0 z-50 h-full bg-primary text-white transition-all duration-300 ease-in-out lg:relative",
+          "fixed top-0 left-0 z-50 h-full bg-primary text-white transition-all duration-300 ease-in-out ",
           isCollapsed ? "w-16" : "w-64",
           isMobileMenuOpen
             ? "translate-x-0"
@@ -116,15 +118,15 @@ export function Sidenav() {
             {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
           </Button>
         </div>
-        <ScrollArea className="flex-1 h-[calc(100vh-8rem)]">
+        <ScrollArea className=" h-[calc(100vh-8rem)]  flex-1">
           <nav className="flex flex-col gap-2 p-2">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-primary/90",
-                  pathname === item.href ? "bg-primary/90" : "transparent",
+                  "flex items-center gap-2 rounded-lg px-3 py-2 transition-colors hover:bg-[#53B25C80]",
+                  pathname === item.href ? "bg-[#53B25C80]" : "transparent",
                   isCollapsed ? "justify-center" : ""
                 )}
                 onClick={() => setIsMobileMenuOpen(false)}
@@ -134,6 +136,21 @@ export function Sidenav() {
               </Link>
             ))}
           </nav>
+          <div
+            onClick={() => {
+              clearUser();
+              clearTokens();
+              router.push("/");
+            }}
+            className={cn(
+              "flex items-center gap-2  cursor-pointer font-semibold text-red-700 rounded-lg px-5 py-2 transition-colors hover:bg-[#53B25C80]",
+              "transparent",
+              isCollapsed ? "justify-center" : ""
+            )}
+          >
+            <LogOutIcon className="h-5 w-5" />
+            {!isCollapsed && <p>Log out</p>}
+          </div>
         </ScrollArea>
       </div>
     </>

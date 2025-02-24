@@ -129,26 +129,30 @@ export default function DashboardPage() {
             {user?.role !== "LECTURER" && (
               <>
                 <div>
-                  <p className="text-sm font-medium">Matric No:</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm md:text-lg font-medium">Matric No:</p>
+                  <p className="text-sm md:text-lg  text-muted-foreground">
                     {user?.matricNo}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Level:</p>
-                  <p className="text-sm text-muted-foreground">{user?.level}</p>
+                  <p className="text-sm md:text-lg font-medium">Level:</p>
+                  <p className="text-sm  md:text-lg text-muted-foreground">
+                    {user?.level}
+                  </p>
                 </div>
               </>
             )}
             <div>
-              <p className="text-sm font-medium">Department:</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm md:text-lg font-medium">Department:</p>
+              <p className="text-sm  md:text-lg text-muted-foreground">
                 {user?.department}
               </p>
             </div>
             <div>
-              <p className="text-sm font-medium">Faculty:</p>
-              <p className="text-sm text-muted-foreground">{user?.faculty}</p>
+              <p className="text-sm md:text-lg font-medium">Faculty:</p>
+              <p className="text-sm capitalize md:text-lg text-muted-foreground">
+                {user?.faculty}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -157,7 +161,9 @@ export default function DashboardPage() {
       {user?.role !== "LECTURER" && (
         <div>
           <div>
-            <div>Upcoming Assignments</div>
+            <div className="mb-3 text-lg font-semibold">
+              Upcoming Assignments
+            </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {upcomingAssignments.map((assignment) => (
@@ -200,7 +206,7 @@ export default function DashboardPage() {
           </div>
 
           <div>
-            <div>Past Assignments</div>
+            <div className="mb-3 text-lg font-semibold">Past Assignments</div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {pastAssignments.map((assignment) => (
                 <Card key={assignment.id}>
@@ -241,23 +247,51 @@ export default function DashboardPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {user && user.Courses && user?.Courses.map((course) => (
-              <Card key={course.id}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{course?.courseCode}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {course?.title}
-                  </p>
-                  <Button asChild className="w-full mt-4">
-                    <Link href={`/courses/${course.id}`}>View Course</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {user?.role === "LECTURER" ? (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {user &&
+                user.lecturerCourses &&
+                user?.lecturerCourses.map((course) => (
+                  <Card key={course.id}>
+                    <CardHeader>
+                      <CardTitle className="text-lg">
+                        {course?.courseCode}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">
+                        {course?.title}
+                      </p>
+                      <Button asChild className="w-full mt-4">
+                        <Link href={`/courses/${course.id}`}>View Course</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {user &&
+                user.enrolledCourses &&
+                user?.enrolledCourses.map((course) => (
+                  <Card key={course.id}>
+                    <CardHeader>
+                      <CardTitle className="text-lg">
+                        {course?.courseCode}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">
+                        {course?.title}
+                      </p>
+                      <Button asChild className="w-full mt-4">
+                        <Link href={`/courses/${course.id}`}>View Course</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

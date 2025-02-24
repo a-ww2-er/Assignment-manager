@@ -1,57 +1,45 @@
 import { Request, Response } from "express";
 import { prismaClient } from "..";
 import { User } from "@prisma/client";
+
 export const registerCourse = async (req: Request, res: Response) => {
   const { courseId } = req.body;
-  const userId = req.user?.id; // Assuming you have user authentication middleware
+  const userId = req.user?.id;
 
   try {
-    // Fetch the user and course
+    // Verify user is student
     const user = await prismaClient.user.findUnique({
       where: { id: userId },
-      include: { course: true, Courses: true },
+      select: { role: true, enrolledCourses: true },
     });
 
-    const course = await prismaClient.course.findUnique({
-      where: { id: courseId },
+    if (!user) return res.status(404).json({ error: "User not found" });
+    if (user.role !== "STUDENT") {
+      return res
+        .status(403)
+        .json({ error: "Only students can register for courses" });
+    }
+
+    // Check if already enrolled
+    const isEnrolled = user.enrolledCourses.some(
+      (course) => course.id === courseId
+    );
+    if (isEnrolled) {
+      return res.status(400).json({ error: "Already enrolled in this course" });
+    }
+
+    // Register student for course
+    const updatedUser = await prismaClient.user.update({
+      where: { id: userId },
+      data: {
+        enrolledCourses: {
+          connect: { id: courseId },
+        },
+      },
+      include: {
+        enrolledCourses: true,
+      },
     });
-
-    if (!user || !course) {
-      return res.status(404).json({ error: "User or course not found" });
-    }
-
-    let updatedUser: User;
-
-    if (user.role === "LECTURER") {
-      // If lecturer, connect them as the course lecturer
-      updatedUser = await prismaClient.user.update({
-        where: { id: userId },
-        data: {
-          course: {
-            connect: { id: courseId },
-          },
-        },
-        include: {
-          course: true,
-          Assignment: true,
-          Courses: true,
-          submissions: true,
-        },
-      });
-    } else if (user.role === "STUDENT") {
-      // If student, add the course to their enrolled courses
-      updatedUser = await prismaClient.user.update({
-        where: { id: userId },
-        data: {
-          Courses: {
-            connect: { id: courseId },
-          },
-        },
-        include: { Courses: true, Assignment: true, submissions: true },
-      });
-    } else {
-      return res.status(400).json({ error: "Invalid user role" });
-    }
 
     res.status(200).json({
       message: "Course registration successful",
@@ -67,14 +55,27 @@ export const createCourse = async (req: Request, res: Response) => {
   const { title, courseCode } = req.body;
 
   try {
-    // Create the course
+    // Verify user is lecturer
+    if (req.user?.role !== "LECTURER") {
+      return res
+        .status(403)
+        .json({ error: "Only lecturers can create courses" });
+    }
+
     const newCourse = await prismaClient.course.create({
       data: {
         title,
         courseCode,
         lecturer: {
-          connect: {
-            id: req.user?.id,
+          connect: { id: req.user.id },
+        },
+      },
+      include: {
+        lecturer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
           },
         },
       },
@@ -94,8 +95,26 @@ export const getAllCourses = async (req: Request, res: Response) => {
   try {
     const courses = await prismaClient.course.findMany({
       include: {
-        lecturer: true, // Include the lecturer details
-        User: true, // Include enrolled students
+        lecturer: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+        students: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        assignments: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
       },
     });
 
@@ -106,5 +125,37 @@ export const getAllCourses = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching courses:", error);
     res.status(500).json({ error: "Failed to fetch courses" });
+  }
+};
+
+// Get Single Course with Assignments
+export const getSingleCourse = async (req: Request, res: Response) => {
+  const { courseId } = req.params;
+
+  try {
+    const course = await prismaClient.course.findUnique({
+      where: { id: courseId },
+      include: {
+        assignments: {
+          include: {
+            files: true,
+            questions: true,
+          },
+        },
+        lecturer: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!course) return res.status(404).json({ error: "Course not found" });
+
+    res.status(200).json(course);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch course" });
   }
 };

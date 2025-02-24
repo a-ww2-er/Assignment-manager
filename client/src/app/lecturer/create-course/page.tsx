@@ -27,7 +27,13 @@ export default function CreateCoursePage() {
       });
       toast(res.data.message);
       router.push("/courses");
-    } catch (error) {
+    } catch (error: any) {
+      // eslint-disable-line @typescript-eslint/no-explicit-any
+      const errorMessage =
+        error?.response?.message ||
+        error?.message ||
+        "An unexpected error occurred";
+      toast(`Error: ${errorMessage}`);
       console.log(error);
     }
     // After successful submission, redirect to the courses list

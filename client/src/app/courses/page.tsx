@@ -38,23 +38,38 @@ import { toast } from "sonner";
 export default function CoursesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [courses, setCourses] = useState<Course[] | null>(null);
-  const [isLoading, setIsloading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const user = useUserStore().user;
   async function handleCourseRegisteration(id: string) {
+    if (isLoading) return;
     try {
+      setIsLoading(true);
       const res = await api.post("/api/courses/register", { courseId: id });
-    toast(res.data.message)
+      setIsLoading(false);
+      toast(res.data.message);
     } catch (error) {
+      setIsLoading(false);
       toast("failed to register course");
       console.log(error);
     }
   }
   const fetchCourses = async () => {
     try {
+      setIsLoading(true);
       const res = await api.get("/api/courses/");
+      console.log(res.data.courses);
       setCourses(res.data.courses);
-    } catch (error) {
+    } catch (error: any) {
+      // eslint-disable-line @typescript-eslint/no-explicit-any
+      const errorMessage =
+        error?.response?.message ||
+        error?.message ||
+        "An unexpected error occurred";
+      toast(`Error: ${errorMessage}`);
+      setIsLoading(false);
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
   };
   useEffect(() => {
@@ -100,7 +115,7 @@ export default function CoursesPage() {
 
           <div className="space-y-3 flex gap-1 flex-col">
             {filteredCourses.map((course) => (
-              
+              <Link href={`/courses/${course.id}`}>
                 <Card className="p-4 flex flex-col h-full hover:shadow-md transition-shadow">
                   <h2 className="font-bold text-lg text-secondary">
                     {course.courseCode}
@@ -111,15 +126,26 @@ export default function CoursesPage() {
                   <p className="text-sm text-primary mt-1">
                     Lecturer: {course?.lecturer?.firstName || ""}
                   </p>
-                  <Button
-                    
-                    onClick={() => handleCourseRegisteration(course.id)}
-                    className="w-full mt-4"
-                  >
-                    Register course
-                  </Button>
+                  {user?.role === "LECTURER" ? (
+                    ""
+                  ) : user?.enrolledCourses &&
+                    user?.enrolledCourses.find(
+                      (cour) => cour.id === course.id
+                    ) ? (
+                    <p className="w-full p-4 text-primary font-medium">
+                      Course Registered
+                    </p>
+                  ) : (
+                    <Button
+                      onClick={() => handleCourseRegisteration(course.id)}
+                      className="w-full mt-4"
+                    >
+                      Register course
+                    </Button>
+                  )}
                 </Card>
-                   ))}
+              </Link>
+            ))}
           </div>
         </>
       )}

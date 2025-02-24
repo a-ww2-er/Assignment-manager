@@ -85,9 +85,14 @@ export const login = async (
   const user = await prismaClient.user.findFirst({
     where: { matricNo },
     include: {
-      Courses: true,
-      Assignment: true,
+      // Courses: true,
+      // Assignment: true,
       submissions: true,
+      // course: true,
+      createdAssignments: true,
+      enrolledCourses: true,
+      gradedSubmissions: true,
+      lecturerCourses: true,
     },
   });
 
