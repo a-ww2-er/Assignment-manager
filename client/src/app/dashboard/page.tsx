@@ -242,7 +242,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {user && user?.Courses.map((course) => (
+            {user && user.Courses && user?.Courses.map((course) => (
               <Card key={course.id}>
                 <CardHeader>
                   <CardTitle className="text-lg">{course?.courseCode}</CardTitle>
