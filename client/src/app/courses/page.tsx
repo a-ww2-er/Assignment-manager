@@ -43,6 +43,7 @@ export default function CoursesPage() {
   async function handleCourseRegisteration(id: string) {
     try {
       const res = await api.post("/api/courses/register", { courseId: id });
+    toast(res.data.message)
     } catch (error) {
       toast("failed to register course");
       console.log(error);
