@@ -18,15 +18,15 @@ import axios from "axios";
 import { API_URL } from "@/services/variables";
 import { useRouter } from "next/navigation";
 
-export const refetchUserData = async (setUser: (arg0: any) => void) => {
-  try {
-    const res = await api.get("/api/auth/user");
-    setUser(res.data.user);
-    return res.data.user;
-  } catch (error) {
-    console.log(error);
-  }
-};
+//export const refetchUserData = async (setUser: (arg0: any) => void) => {
+ // try {
+//    const res = await api.get("/api/auth/user");
+//    setUser(res.data.user);
+//    return res.data.user;
+//  } catch (error) {
+//    console.log(error);
+//  }
+//};
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     matricNo: "",
@@ -44,9 +44,9 @@ export default function LoginPage() {
   const user = useUserStore().user;
   useEffect(() => {
     if (accessToken) {
-      setisRefetching(true);
-      refetchUserData(setUser);
-      setisRefetching(false);
+    //  setisRefetching(true);
+     // refetchUserData(setUser);
+     // setisRefetching(false);
     }
   }, [accessToken]);
   useEffect(() => {
