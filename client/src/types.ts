@@ -22,7 +22,7 @@ export interface User {
   profileImage: string;
   role: Role;
   createdAt: Date;
-  courses?: Course[];
+  Courses?: Course[];
   assignments?: Assignment[];
 }
 
