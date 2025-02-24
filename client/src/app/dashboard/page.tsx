@@ -103,7 +103,7 @@ export default function DashboardPage() {
     <div className="container mx-auto p-2 lg:p-4 space-y-6">
       {user?.role === "LECTURER" && (
         <h1 className="text-2xl font-bold text-center my-8 lg:text-3xl">
-          Lecturer's Dashboard
+          Lecturer&apos;s Dashboard
         </h1>
       )}
       <Card>
