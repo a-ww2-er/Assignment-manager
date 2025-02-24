@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable */
 
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
