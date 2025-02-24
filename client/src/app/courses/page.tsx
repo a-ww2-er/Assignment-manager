@@ -99,11 +99,8 @@ export default function CoursesPage() {
 
           <div className="space-y-3 flex gap-1 flex-col">
             {filteredCourses.map((course) => (
-              <Link
-                href={`/sessions/${course.courseCode}`}
-                key={course.courseCode}
-              >
-                <Card className="p-4 hover:shadow-md transition-shadow">
+              
+                <Card className="p-4 flex flex-col h-full hover:shadow-md transition-shadow">
                   <h2 className="font-bold text-lg text-secondary">
                     {course.courseCode}
                   </h2>
@@ -114,15 +111,14 @@ export default function CoursesPage() {
                     Lecturer: {course?.lecturer?.firstName || ""}
                   </p>
                   <Button
-                    asChild
+                    
                     onClick={() => handleCourseRegisteration(course.id)}
                     className="w-full mt-4"
                   >
                     Register course
                   </Button>
                 </Card>
-              </Link>
-            ))}
+                   ))}
           </div>
         </>
       )}
