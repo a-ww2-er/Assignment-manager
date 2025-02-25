@@ -71,7 +71,7 @@ export default function SubmissionDetailPage() {
     e.preventDefault();
 
     const numericGrade = parseInt(grade);
-    if (isNaN(numericGrade) {
+    if (isNaN(numericGrade)) {
       toast.error("Please enter a valid number");
       return;
     }
@@ -84,7 +84,7 @@ export default function SubmissionDetailPage() {
     try {
       setIsSubmitting(true);
       const response = await api.put(
-        `/api/assignments/submissions/${submissionId}/grade`,
+        `/api/assignments/submission/${submissionId}/grade`,
         { grade: numericGrade }
       );
 
