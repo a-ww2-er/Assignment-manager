@@ -34,7 +34,7 @@ assignmentRouter.post(
   errorHandler(createAssignment)
 );
 assignmentRouter.get(
-  "/submission/:assignmentId ",
+  "/submission/:assignmentId",
   [authMiddleware],
   errorHandler(getAssignmentSubmissions)
 );
@@ -44,17 +44,17 @@ assignmentRouter.get(
   errorHandler(getLecturerSubmissions)
 );
 assignmentRouter.get(
-  "/submission-for-grade/:submissionId ",
+  "/submission-for-grade/:submissionId",
   [authMiddleware],
   errorHandler(getSubmissionDetails)
 );
 assignmentRouter.get(
-  "/submission/:submissionId ",
+  "/submission/:submissionId",
   [authMiddleware],
   errorHandler(getSubmission)
 );
 assignmentRouter.put(
-  "/submission/:submissionId/grade ",
+  "/submission/:submissionId/grade",
   [authMiddleware, adminMiddleware],
   errorHandler(gradeSubmission)
 );
