@@ -72,7 +72,7 @@ export default function SubmissionDetailPage() {
         const response = await api.get<SubmissionResponse>(
           `/api/assignments/submission-for-grade/${submissionId}`
         );
-
+console.log(response.data)
         const formattedData: SubmissionDetails = {
           id: response.data.id,
           studentName: `${response.data.student.firstName} ${response.data.student.lastName}`,
@@ -81,14 +81,8 @@ export default function SubmissionDetailPage() {
           submissionDate: response.data.submittedAt,
           grade: response.data.grade,
           fileUrl: response.data.fileUrl,
-          fileType: response.data.fileUrl?.split(".").pop() || null,
-          studentHistory: response.data.assignment.submissions
-            .filter((s) => s.id !== submissionId)
-            .map((s) => ({
-              assignmentTitle: s.assignment.title,
-              submissionDate: s.submittedAt,
-              grade: s.grade,
-            })),
+          fileType: response.data.fileType || null,
+          studentHistory: response.data.studentHistory
         };
 
         setSubmission(formattedData);
