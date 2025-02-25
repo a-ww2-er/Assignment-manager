@@ -14,17 +14,8 @@ import api from "@/services/api/apiInterceptors";
 
 export interface SubmissionResponse {
   id: string;
-  student: {
-    firstName: string;
-    lastName: string;
-    matricNo: string | null;
-  };
-  assignment: {
-    title: string;
-    course: {
-      id: string;
-      courseCode: string;
-    };
+  studentName: string;
+  assignmentTitle: string;
     submissions: Array<{
       id: string;
       submittedAt: string;
@@ -35,7 +26,7 @@ export interface SubmissionResponse {
     }>;
   };
   studentHistory: any;
-  submittedAt: string;
+  submissionDate: string;
   grade: number | null;
   fileUrl: string | null;
   fileType: string | null;
@@ -134,17 +125,17 @@ export default function SubmissionDetailPage() {
         </CardHeader>
         <CardContent>
           <p>
-            <strong>Name:</strong> {submission.student.firstName} {submission.student.lastName}
+            <strong>Name:</strong> {submission?.studentName}
           </p>
           <p>
-            <strong>Matric No:</strong> {submission.student.matricNo || "N/A"}
+            <strong>Matric No:</strong> {submission?.matricNo || "N/A"}
           </p>
           <p>
-            <strong>Assignment:</strong> {submission.assignment.title}
+            <strong>Assignment:</strong> {submission?.assignmentTitle}
           </p>
           <p>
             <strong>Submission Date:</strong>{" "}
-            {new Date(submission.submittedAt).toLocaleDateString()}
+            {new Date(submission.submissionDate).toLocaleDateString()}
           </p>
         </CardContent>
       </Card>
