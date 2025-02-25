@@ -59,7 +59,7 @@ assignmentRouter.put(
   errorHandler(gradeSubmission)
 );
 assignmentRouter.post(
-  "/:assignmentId/submissions",
+  "/submit/:assignmentId/submissions",
   [authMiddleware, uploadFile],
   errorHandler(createSubmission)
 );
