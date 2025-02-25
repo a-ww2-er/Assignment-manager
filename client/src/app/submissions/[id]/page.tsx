@@ -17,7 +17,7 @@ export default function SubmissionPage() {
   useEffect(() => {
     const fetchSubmission = async () => {
       try {
-        const response = await api.get(`/api/submissions/${submissionId}`);
+        const response = await api.get(`/api/assignments/submissions/${submissionId}`);
         setSubmission(response.data);
         setError(null);
       } catch (error: any) {
