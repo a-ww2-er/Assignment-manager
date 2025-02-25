@@ -89,7 +89,7 @@ export default function AssignmentPage() {
         formData.append("quizAnswers", JSON.stringify(quizAnswers));
       }
 
-      await api.post(`/api/assignments/${assignmentId}/submissions`, formData, {
+      await api.post(`/api/assignments/submit/${assignmentId}/submissions`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -98,7 +98,7 @@ export default function AssignmentPage() {
       fetchAssignment(); // Refresh assignment data
     } catch (error) {
       console.error("Submission error:", error);
-      setError("Failed to submit assignment");
+      setError(error?.response?.data?.message || "Failed to submit ");
     }
   };
 
