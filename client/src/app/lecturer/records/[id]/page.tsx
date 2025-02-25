@@ -101,7 +101,7 @@ export default function SubmissionDetailPage() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }) 
 
   if (isLoading) {
     return (
