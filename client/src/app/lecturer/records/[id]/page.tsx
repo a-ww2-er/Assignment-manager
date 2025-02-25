@@ -24,7 +24,7 @@ export interface SubmissionResponse {
         title: string;
       };
     }>;
-  };
+
   studentHistory: any;
   submissionDate: string;
   grade: number | null;
