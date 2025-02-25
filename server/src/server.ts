@@ -11,12 +11,12 @@ import { errorMiddleware } from "./middlewares/errorsMiddleware";
 
 // import { getUserRecommendations } from "./controllers/recommendattions";
 
-const serverIP = Object.values(os.networkInterfaces())
-  .flat()
-  .filter((info) => info.family === "IPv4" && !info.internal)
-  .map((info) => info.address)[0];
+//const serverIP = Object.values(os.networkInterfaces())
+  //.flat()
+ // .filter((info) => info.family === "IPv4" && !info.internal)
+ // .map((info) => info.address)[0];
 
-console.log("Server IP address:", serverIP);
+//console.log("Server IP address:", serverIP);
 //EXPRESS SERVER SETUP
 
 const app: Express = express();
