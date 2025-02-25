@@ -110,7 +110,7 @@ export default function RecordsPage() {
                     </TableCell>
                     <TableCell>
                       <Button asChild size="sm">
-                        <Link href={`/records/${sub.id}`}>
+                        <Link href={`/lecturer/records/${sub.id}`}>
                           View Details
                         </Link>
                       </Button>
