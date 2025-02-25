@@ -59,7 +59,7 @@ export interface SubmissionResponse {
 }
 
 export default function SubmissionDetailPage() {
-  const { submissionId } = useParams();
+  const { id:submissionId } = useParams();
   const router = useRouter();
   const [submission, setSubmission] = useState<SubmissionDetails | null>(null);
   const [grade, setGrade] = useState<string>("0");
