@@ -52,6 +52,7 @@ export interface SubmissionResponse {
       };
     }>;
   };
+  studentHistory:any;
   submittedAt: string;
   grade: number | null;
   fileUrl: string | null;
