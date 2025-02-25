@@ -55,6 +55,7 @@ export interface SubmissionResponse {
   submittedAt: string;
   grade: number | null;
   fileUrl: string | null;
+  fileType: string | null;
   quizAnswers: Record<string, string> | null;
 }
 
