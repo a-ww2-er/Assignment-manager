@@ -63,7 +63,7 @@ export interface SubmissionResponse {
 export default function SubmissionDetailPage() {
   const { id:submissionId } = useParams();
   const router = useRouter();
-  const [submission, setSubmission] = useState<SubmissionDetails | null>(null);
+  const [submission, setSubmission] = useState<SubmissionResponse | null>(null);
   const [grade, setGrade] = useState<string>("0");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,19 +75,19 @@ export default function SubmissionDetailPage() {
           `/api/assignments/submission-for-grade/${submissionId}`
         );
 console.log(response.data)
-        const formattedData: SubmissionDetails = {
-          id: response.data.id,
-          studentName: `${response.data.student.firstName} ${response.data.student.lastName}`,
-          matricNo: response.data.student.matricNo,
-          assignmentTitle: response.data.assignment.title,
-          submissionDate: response.data.submittedAt,
-          grade: response.data.grade,
-          fileUrl: response.data.fileUrl,
-          fileType: response.data.fileType || null,
-          studentHistory: response.data.studentHistory
-        };
+      //  const formattedData: SubmissionDetails = {
+   //       id: response.data.id,
+   //       studentName: `${response.data.student.firstName} ${response.data.student.lastName}`,
+    //    matricNo: response.data.student.matricNo,
+  //        assignmentTitle: response.data.assignment.title,
+    //      submissionDate: response.data.submittedAt,
+  //     grade: response.data.grade,
+ //         fileUrl: response.data.fileUrl,
+   //       fileType: response.data.fileType || null,
+ //         studentHistory: response.data.studentHistory
+      //  };
 
-        setSubmission(formattedData);
+        setSubmission(response.data);
         setGrade(response.data.grade?.toString() || "");
       } catch (error) {
         toast.error("Failed to fetch submission details");
