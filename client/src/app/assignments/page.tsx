@@ -33,10 +33,11 @@ export default function AssignmentsPage() {
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
-        const response = await api.get("/api/assignments/user");
+        const response = await api.get("/api/assignments/user/assignments");
         setAssignments(response.data);
         setError(null);
       } catch (error: any) {
+        console.log("Error to get assignments", error);
         setError(error.response?.data?.error || "Failed to fetch assignments");
       } finally {
         setIsLoading(false);

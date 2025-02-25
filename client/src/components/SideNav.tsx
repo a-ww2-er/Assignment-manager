@@ -33,11 +33,11 @@ const studentNavItems = [
 const lecturerNavItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },
   { href: "/courses", icon: GraduationCap, label: "Courses" },
-  {
-    href: "/lecturer/create-assignment",
-    icon: PlusCircle,
-    label: "Create Assignment",
-  },
+  // {
+  //   href: "/lecturer/create-assignment/1235",
+  //   icon: PlusCircle,
+  //   label: "Create Assignment",
+  // },
   { href: "/lecturer/create-course", icon: PlusCircle, label: "Create Course" },
   { href: "/lecturer/records", icon: FileText, label: "Records" },
 ];

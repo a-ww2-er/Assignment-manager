@@ -136,7 +136,7 @@ export default function RegisterPage() {
         error?.response?.message ||
         error?.message ||
         "An unexpected error occurred";
-      toast(`Error: ${errorMessage}`);
+      toast.error(`Error: ${errorMessage}`);
       console.error("Registration failed:", error);
     } finally {
       setLoading(false);

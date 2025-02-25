@@ -3,18 +3,19 @@
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Clock, Loader2 } from "lucide-react";
+import { CalendarDays, Clock, Loader2, PlusCircle } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import api from "@/services/api/apiInterceptors";
 import { toast } from "sonner";
+import { useUserStore } from "@/services/store/userStore";
 
 export default function CoursePage() {
   const params = useParams();
   const [course, setCourse] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const user = useUserStore().user;
   const fetchCourse = async () => {
     try {
       setIsLoading(true);
@@ -87,6 +88,14 @@ export default function CoursePage() {
 
       {/* Assignments Grid */}
       <h2 className="text-2xl font-semibold">Assignments</h2>
+      {user && user.role === "LECTURER" && (
+        <Link href={`/lecturer/create-assignment/${course.id}`}>
+          <Button type="button" className="text-white my-3">
+            <PlusCircle className="mr-2 w-4 h-4 text-white" />
+            Create Assignment
+          </Button>
+        </Link>
+      )}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {course.assignments?.length > 0 ? (
           course.assignments.map((assignment: any) => (

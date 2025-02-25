@@ -19,7 +19,7 @@ import { API_URL } from "@/services/variables";
 import { useRouter } from "next/navigation";
 
 //export const refetchUserData = async (setUser: (arg0: any) => void) => {
- // try {
+// try {
 //    const res = await api.get("/api/auth/user");
 //    setUser(res.data.user);
 //    return res.data.user;
@@ -44,9 +44,9 @@ export default function LoginPage() {
   const user = useUserStore().user;
   useEffect(() => {
     if (accessToken) {
-    //  setisRefetching(true);
-     // refetchUserData(setUser);
-     // setisRefetching(false);
+      //  setisRefetching(true);
+      // refetchUserData(setUser);
+      // setisRefetching(false);
     }
   }, [accessToken]);
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function LoginPage() {
         error?.response?.message ||
         error?.message ||
         "An unexpected error occurred";
-      toast(`Error: ${errorMessage}`);
+      toast.error(`Error: ${errorMessage}`);
       console.error("Login failed:", error);
       // throw error;
     }

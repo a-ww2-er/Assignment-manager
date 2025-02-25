@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CalendarDays, Clock, Upload, Loader2 } from "lucide-react";
 import type { Assignment } from "@/types";
 import api from "@/services/api/apiInterceptors";
+import { FileUploadInstructions } from "@/components/FileUploadInstructions";
 
 export default function AssignmentPage() {
   const params = useParams();
@@ -27,7 +28,7 @@ export default function AssignmentPage() {
       const response = await api.get(`/api/assignments/${assignmentId}`);
       setAssignment(response.data);
       setError(null);
-
+      console.log(response.data);
       // Initialize form with existing submission if available
       if (response.data.submissions?.[0]) {
         const submission = response.data.submissions[0];
@@ -37,9 +38,11 @@ export default function AssignmentPage() {
       }
     } catch (error: any) {
       const errorMessage =
+        error.response?.data?.message ||
         error.response?.data?.error ||
         error.message ||
-        "Failed to fetch assignment";
+        error.response?.message;
+      // ("Failed to fetch assignment");
       setError(errorMessage);
     } finally {
       setIsLoading(false);

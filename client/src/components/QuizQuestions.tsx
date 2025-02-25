@@ -9,10 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Trash2 } from "lucide-react";
 
 interface QuizQuestionsProps {
-  questions: { question: string; options: string[]; correctAnswer: string }[];
+  questions: { question: string; options: string[]; answer: string }[];
   setQuestions: React.Dispatch<
     React.SetStateAction<
-      { question: string; options: string[]; correctAnswer: string }[]
+      { question: string; options: string[]; answer: string }[]
     >
   >;
 }
@@ -20,17 +20,17 @@ interface QuizQuestionsProps {
 export function QuizQuestions({ questions, setQuestions }: QuizQuestionsProps) {
   const [newQuestion, setNewQuestion] = useState("");
   const [newOptions, setNewOptions] = useState(["", "", "", ""]);
-  const [correctAnswer, setCorrectAnswer] = useState("");
+  const [answer, setanswer] = useState("");
 
   const addQuestion = () => {
-    if (newQuestion && newOptions.every((option) => option) && correctAnswer) {
+    if (newQuestion && newOptions.every((option) => option) && answer) {
       setQuestions([
         ...questions,
-        { question: newQuestion, options: newOptions, correctAnswer },
+        { question: newQuestion, options: newOptions, answer },
       ]);
       setNewQuestion("");
       setNewOptions(["", "", "", ""]);
-      setCorrectAnswer("");
+      setanswer("");
     }
   };
 
@@ -55,7 +55,7 @@ export function QuizQuestions({ questions, setQuestions }: QuizQuestionsProps) {
             {q.options.map((option, i) => (
               <li
                 key={i}
-                className={option === q.correctAnswer ? "text-green-600" : ""}
+                className={option === q.answer ? "text-green-600" : ""}
               >
                 {option}
               </li>
@@ -88,15 +88,15 @@ export function QuizQuestions({ questions, setQuestions }: QuizQuestionsProps) {
         </div>
       ))}
       <div className="space-y-2">
-        <Label htmlFor="correctAnswer">Correct Answer</Label>
+        <Label htmlFor="answer">Correct Answer</Label>
         <Input
-          id="correctAnswer"
-          value={correctAnswer}
-          onChange={(e) => setCorrectAnswer(e.target.value)}
+          id="answer"
+          value={answer}
+          onChange={(e) => setanswer(e.target.value)}
           placeholder="Enter correct answer"
         />
       </div>
-      <Button onClick={addQuestion}>Add Question</Button>
+      <Button type={"button"} onClick={addQuestion}>Add Question</Button>
     </div>
   );
 }

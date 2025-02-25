@@ -6,8 +6,10 @@ import {
   createAssignment,
   createSubmission,
   getAssignmentSubmissions,
+  getLecturerSubmissions,
   getSingleAssignment,
   getSubmission,
+  getSubmissionDetails,
   getUserAssignments,
   gradeSubmission,
 } from "../controllers/assignment";
@@ -22,12 +24,12 @@ assignmentRouter.get(
   errorHandler(getSingleAssignment)
 );
 assignmentRouter.get(
-  "/user",
+  "/user/assignments",
   [authMiddleware],
   errorHandler(getUserAssignments)
 );
 assignmentRouter.post(
-  "/create",
+  "/create/:courseId",
   [authMiddleware, adminMiddleware],
   errorHandler(createAssignment)
 );
@@ -37,12 +39,22 @@ assignmentRouter.get(
   errorHandler(getAssignmentSubmissions)
 );
 assignmentRouter.get(
+  "/lecturer/submissions",
+  [authMiddleware, adminMiddleware],
+  errorHandler(getLecturerSubmissions)
+);
+assignmentRouter.get(
+  "/submission-for-grade/:submissionId ",
+  [authMiddleware],
+  errorHandler(getSubmissionDetails)
+);
+assignmentRouter.get(
   "/submission/:submissionId ",
   [authMiddleware],
   errorHandler(getSubmission)
 );
-assignmentRouter.post(
-  "/submission/grade/:submissionId ",
+assignmentRouter.put(
+  "/submission/:submissionId/grade ",
   [authMiddleware, adminMiddleware],
   errorHandler(gradeSubmission)
 );

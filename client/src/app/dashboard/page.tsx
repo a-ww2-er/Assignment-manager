@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarDays, Clock } from "lucide-react";
 import Link from "next/link";
 import { useUserStore } from "@/services/store/userStore";
+import api from "@/services/api/apiInterceptors";
 
 // Mock data (replace with actual API calls)
 // const user = {
@@ -36,13 +37,13 @@ const upcomingAssignments = [
     dueDate: "2023-06-20T23:59:59Z",
     type: "DOCUMENT_UPLOAD",
   },
-  {
-    id: "3",
-    title: "Database Design Essay",
-    courseCode: "CMP403",
-    dueDate: "2023-06-18T17:00:00Z",
-    type: "TEXT",
-  },
+  // {
+  //   id: "3",
+  //   title: "Database Design Essay",
+  //   courseCode: "CMP403",
+  //   dueDate: "2023-06-18T17:00:00Z",
+  //   type: "TEXT",
+  // },
 ];
 
 const pastAssignments = [
@@ -75,7 +76,26 @@ export default function DashboardPage() {
     {}
   );
   const user = useUserStore().user;
+  console.log("user", user);
+  const [assignments, setAssignments] = useState<newAssignment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        const response = await api.get("/api/assignments/user/assignments");
+        setAssignments(response.data);
+        setError(null);
+      } catch (error: any) {
+        console.log("Error to get assignments", error);
+        setError(error.response?.data?.error || "Failed to fetch assignments");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAssignments();
+  }, []);
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date();
