@@ -103,7 +103,7 @@ export default function SubmissionDetailPage() {
     }
   
   }
-  );
+  
 
   if (isLoading) {
     return (
