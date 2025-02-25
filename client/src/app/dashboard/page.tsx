@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
-import { CalendarDays, Clock } from "lucide-react";
+import { CalendarDays, Clock, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useUserStore } from "@/services/store/userStore";
 import api from "@/services/api/apiInterceptors";
+import { Assignment } from "@/types";
 
 // Mock data (replace with actual API calls)
 // const user = {
@@ -70,7 +71,12 @@ const userCourses = [
   { id: "4", code: "CMP404", title: "Artificial Intelligence" },
   { id: "5", code: "CMP405", title: "Computer Networks" },
 ];
-
+interface newAssignment extends Assignment {
+  courseCode: string;
+  status: string;
+  grade?: number;
+  // submissions:Submission
+}
 export default function DashboardPage() {
   const [timeRemaining, setTimeRemaining] = useState<{ [key: string]: string }>(
     {}
@@ -85,10 +91,11 @@ export default function DashboardPage() {
       try {
         const response = await api.get("/api/assignments/user/assignments");
         setAssignments(response.data);
-        setError(null);
+        //  setError(null);
+        console.log(response.data);
       } catch (error: any) {
         console.log("Error to get assignments", error);
-        setError(error.response?.data?.error || "Failed to fetch assignments");
+        // setError(error.response?.data?.error || "Failed to fetch assignments");
       } finally {
         setIsLoading(false);
       }
@@ -97,12 +104,14 @@ export default function DashboardPage() {
     fetchAssignments();
   }, []);
   useEffect(() => {
-    const timer = setInterval(() => {
+    const updateTimeRemaining = () => {
       const now = new Date();
       const newTimeRemaining: { [key: string]: string } = {};
-      upcomingAssignments.forEach((assignment) => {
+
+      assignments.forEach((assignment) => {
         const dueDate = new Date(assignment.dueDate);
         const diff = dueDate.getTime() - now.getTime();
+
         if (diff > 0) {
           const days = Math.floor(diff / (1000 * 60 * 60 * 24));
           const hours = Math.floor(
@@ -114,12 +123,19 @@ export default function DashboardPage() {
           newTimeRemaining[assignment.id] = "Due";
         }
       });
+
       setTimeRemaining(newTimeRemaining);
-    }, 60000); // Update every minute
+    };
 
+    // Run immediately on mount and assignments change
+    updateTimeRemaining();
+
+    // Then update every minute
+    const timer = setInterval(updateTimeRemaining, 60000);
+
+    // Clear interval on unmount or assignments change
     return () => clearInterval(timer);
-  }, []);
-
+  }, [assignments]); // Only re-run when assignments change
   return (
     <div className="container mx-auto p-2 lg:p-4 space-y-6">
       {user?.role === "LECTURER" && (
@@ -186,73 +202,119 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {upcomingAssignments.map((assignment) => (
-                <Card key={assignment.id}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      {assignment.courseCode}
-                    </CardTitle>
-                    <div
-                      className={`px-2 py-1 rounded text-xs font-semibold ${
-                        assignment.type === "QUIZ"
-                          ? "bg-blue-100 text-blue-800"
-                          : assignment.type === "DOCUMENT_UPLOAD"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
-                    >
-                      {assignment.type}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{assignment.title}</div>
-                    <p className="text-xs text-muted-foreground">
-                      <CalendarDays className="inline-block w-4 h-4 mr-1" />
-                      Due: {new Date(assignment.dueDate).toLocaleDateString()}
+              {assignments && assignments.length > 0 ? (
+                assignments.map((assignment) => (
+                  <Card key={assignment.id}>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        {assignment.courseCode}
+                      </CardTitle>
+                      <div
+                        className={`px-2 py-1 rounded text-xs font-semibold ${
+                          assignment.type === "QUIZ"
+                            ? "bg-blue-100 text-blue-800"
+                            : assignment.type === "DOCUMENT_UPLOAD"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {assignment.type}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {assignment.title}
+                      </div>
+                      <p className="text-xs text-muted-foreground my-2">
+                        <CalendarDays className="inline-block w-4 h-4 mr-1 " />
+                        Due: {new Date(assignment.dueDate).toLocaleDateString()}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        <Clock className="inline-block w-4 h-4 mr-1" />
+                        Time Remaining: {timeRemaining[assignment.id]}
+                      </p>
+                      <Button asChild className="w-full mt-4">
+                        <Link href={`/assignments/${assignment.id}`}>
+                          View Assignment
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : isLoading ? (
+                <div className="flex items-center justify-center h-32 w-full lg:w-[80vw]">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                </div>
+              ) : (
+                <Card className="w-full lg:w-[75vw]">
+                  <CardContent className="w-full  min-h-32 flex items-center justify-center">
+                    <p className="text-center text-lg text-gray-500">
+                      No Upcoming Assignments
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      <Clock className="inline-block w-4 h-4 mr-1" />
-                      Time Remaining: {timeRemaining[assignment.id]}
-                    </p>
-                    <Button asChild className="w-full mt-4">
-                      <Link href={`/assignments/${assignment.id}`}>
-                        View Assignment
-                      </Link>
-                    </Button>
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </div>
           </div>
 
-          <div>
-            <div className="mb-3 text-lg font-semibold">Past Assignments</div>
+          <div className="my-4">
+            <div className="mb-3 text-lg font-semibold my-3">
+              Past Assignments
+            </div>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {pastAssignments.map((assignment) => (
-                <Card key={assignment.id}>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      {assignment.courseCode}
-                    </CardTitle>
-                    <div className="px-2 py-1 rounded bg-gray-100 text-gray-800 text-xs font-semibold">
-                      Grade: {assignment.grade}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{assignment.title}</div>
-                    <p className="text-xs text-muted-foreground">
-                      <CalendarDays className="inline-block w-4 h-4 mr-1" />
-                      Submitted:{" "}
-                      {new Date(assignment.submittedAt).toLocaleDateString()}
+              {assignments &&
+              assignments.length > 0 &&
+              assignments.some(
+                (assignment) => assignment.status === "completed"
+              ) ? (
+                assignments.map((assignment) => {
+                  if (assignment.status !== "completed") {
+                    return null;
+                  }
+                  return (
+                    <Card key={assignment.id}>
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">
+                          {assignment.courseCode}
+                        </CardTitle>
+                        <div className="px-2 py-1 rounded bg-gray-100 text-gray-800 text-xs font-semibold">
+                          Grade: {assignment.grade}
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">
+                          {assignment.title}
+                        </div>
+                        <p className="text-xs text-muted-foreground my-2">
+                          <CalendarDays className="inline-block w-4 h-4 mr-1" />
+                          Submitted: {new Date().toLocaleDateString()}
+                        </p>
+                        {assignment?.submissions && (
+                          <Button asChild className="w-full mt-4">
+                            <Link
+                              href={`/submissions/${assignment.submissions[0].id}`}
+                            >
+                              View Submission
+                            </Link>
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  );
+                })
+              ) : isLoading ? (
+                <div className="flex items-center justify-center h-32 w-full lg:w-[80vw]">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                </div>
+              ) : (
+                <Card className="w-full lg:w-[75vw]">
+                  <CardContent className="w-full  min-h-32 flex items-center justify-center">
+                    <p className="text-center text-lg text-gray-500">
+                      No Submitted assignments
                     </p>
-                    <Button asChild className="w-full mt-4" variant="outline">
-                      <Link href={`/assignments/${assignment.id}`}>
-                        View Submission
-                      </Link>
-                    </Button>
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </div>
           </div>
         </div>
