@@ -70,7 +70,7 @@ export default function SubmissionDetailPage() {
     const fetchSubmission = async () => {
       try {
         const response = await api.get<SubmissionResponse>(
-          `/api/assignments/submissions-for-grade/${submissionId}`
+          `/api/assignments/submission-for-grade/${submissionId}`
         );
 
         const formattedData: SubmissionDetails = {
